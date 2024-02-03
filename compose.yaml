@@ -4,6 +4,7 @@ services:
   circom:
     container_name: circom
     image: circom:unoptimized
-    build: images/circom/
+    build: ./images/circom/
+    working_dir: /sindri-project/
     volumes:
       - ./images/circom/:/sindri-project/
