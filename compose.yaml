@@ -16,3 +16,11 @@ services:
     working_dir: /sindri-project/
     volumes:
       - ./images/circomspect/:/sindri-project/
+
+  snarkjs:
+    container_name: snarkjs
+    image: snarkjs:unoptimized
+    build: ./images/snarkjs/
+    working_dir: /sindri-project/
+    volumes:
+      - ./images/snarkjs/:/sindri-project/
