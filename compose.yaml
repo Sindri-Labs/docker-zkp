@@ -6,3 +6,5 @@ services:
     image: circom:latest
     build: images/circom/
     entrypoint: "sleep infinity"
+    volumes:
+      - images/circom/:/sindri-project/

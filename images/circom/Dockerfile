@@ -14,4 +14,6 @@ RUN git clone https://github.com/iden3/circom.git \
     && cargo build --release \
     && cargo install --path circom
 
+WORKDIR /sindri-project/
+
 ENTRYPOINT ["circom"]
