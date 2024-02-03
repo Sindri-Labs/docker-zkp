@@ -1,7 +1,7 @@
 #! /bin/sh -e
 
 # Analyze circuit.
-circomspect -l DEBUG -v circuit.circom
+circomspect -l INFO -v circuit.circom
 
 # Show help information.
 circomspect --help
