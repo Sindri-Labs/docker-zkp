@@ -28,7 +28,7 @@ jobs:
 
       - name: Build the Image
         run: |
-          docker buildx build -f images/${{ matrix.version }}/Dockerfile -t ${{ matrix.version }}:unoptimized --load images/${{ matrix.version }}/
+          docker buildx build -f images/${{ matrix.image }}/Dockerfile -t ${{ matrix.image }}:unoptimized --load images/${{ matrix.image }}/
 
       - name: Install SlimTookit
         run: |
@@ -36,13 +36,13 @@ jobs:
 
       - name: Build Optimized Image
         run: |
-          slim build --target ${{ matrix.version }}:unoptimized \
-            --tag sindrilabs/${{ matrix.version }}:latest \
+          slim build --target ${{ matrix.image }}:unoptimized \
+            --tag sindrilabs/${{ matrix.image }}:latest \
             --http-probe=false \
             --exclude-pattern '/tmp/*' \
-            --mount "./images/${{ matrix.version }}/:/sindri-project/" \
+            --mount "./images/${{ matrix.image }}/:/sindri-project/" \
             --exec "./test.sh"
 
       - name: Deploy to DockerHub
         run: |
-          docker push sindrilabs/${{ matrix.version }}:tagname
+          docker push sindrilabs/${{ matrix.image }}:tagname
