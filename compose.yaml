@@ -3,7 +3,7 @@ version: "3.8"
 services:
   circom:
     container_name: circom
-    image: circom:latest
+    image: circom:unoptimized
     build: images/circom/
     volumes:
       - ./images/circom/:/sindri-project/
