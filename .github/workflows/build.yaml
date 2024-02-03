@@ -45,4 +45,4 @@ jobs:
 
       - name: Deploy to DockerHub
         run: |
-          docker push sindrilabs/${{ matrix.image }}:tagname
+          docker push sindrilabs/${{ matrix.image }}:latest
