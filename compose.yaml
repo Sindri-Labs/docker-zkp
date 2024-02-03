@@ -1,0 +1,8 @@
+version: "3.8"
+
+services:
+  circom:
+    container_name: circom
+    image: circom:latest
+    build: images/circom/
+    entrypoint: "sleep infinity"
