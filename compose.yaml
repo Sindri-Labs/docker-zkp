@@ -8,3 +8,11 @@ services:
     working_dir: /sindri-project/
     volumes:
       - ./images/circom/:/sindri-project/
+
+  circomspect:
+    container_name: circomspect
+    image: circomspect:unoptimized
+    build: ./images/circomspect/
+    working_dir: /sindri-project/
+    volumes:
+      - ./images/circomspect/:/sindri-project/

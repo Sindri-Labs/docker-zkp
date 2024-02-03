@@ -11,7 +11,7 @@ jobs:
   build:
     strategy:
       matrix:
-        image: ["circom"]
+        image: ["circom", "circomspect"]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
