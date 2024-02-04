@@ -17,6 +17,15 @@ services:
     volumes:
       - ./images/circomspect/:/sindri-project/
 
+  nargo:
+    container_name: nargo
+    image: nargo:unoptimized
+    build: ./images/nargo/
+    platform: linux/amd64
+    working_dir: /sindri-project/
+    volumes:
+      - ./images/nargo/:/sindri-project/
+
   snarkjs:
     container_name: snarkjs
     image: snarkjs:unoptimized
