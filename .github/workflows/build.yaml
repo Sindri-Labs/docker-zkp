@@ -38,6 +38,9 @@ jobs:
                   "linux/arm64/v8") image_tag="arm64-v8" ;;
               esac
 
+              echo -e "\n\n\nBuilding ${image_name}:${image_tag}"
+              echo -e "=========================================\n\n\n"
+
             docker buildx build -f images/${{ matrix.image }}/Dockerfile -t "${image_name}:${image_tag}" --load images/${{ matrix.image }}/ --platform $platform
           done
 
@@ -48,12 +51,15 @@ jobs:
       - name: Build Optimized Image
         run: |
           image_name="sindrilabs/${{ matrix.image }}"
-          for arch in "amd64" "arm64/v8"; do
+          for arch in "amd64" "arm64"; do
               # Determine the custom image tag based on the platform.
               case $arch in
                   "amd64") image_tag="amd64" ;;
-                  "arm64/v8") image_tag="arm64-v8" ;;
+                  "arm64") image_tag="arm64-v8" ;;
               esac
+
+              echo -e "\n\n\nOptimizing ${image_name}:${image_tag}"
+              echo -e "=========================================\n\n\n"
 
             slim build --target "${image_name}:${image_tag}" \
               --tag "${image_name}:${image_tag}-optimized" \
