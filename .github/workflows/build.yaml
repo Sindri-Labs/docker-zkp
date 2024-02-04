@@ -64,6 +64,7 @@ jobs:
             slim build --target "${image_name}:${image_tag}" \
               --tag "${image_name}:${image_tag}-optimized" \
               --image-build-arch $arch \
+              --image-build-engine docker \
               --http-probe=false \
               --exclude-pattern '/tmp/*' \
               --mount "./images/${{ matrix.image }}/:/sindri-project/" \
