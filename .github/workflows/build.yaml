@@ -31,11 +31,10 @@ jobs:
         run: |
           # Loop over supported platforms.
           image_name="sindrilabs/${{ matrix.image }}"
-          for platform in "linux/amd64" "linux/arm/v7" "linux/arm64/v8"; do
+          for platform in "linux/amd64" "linux/arm64/v8"; do
               # Determine the custom image tag based on the platform.
               case $platform in
                   "linux/amd64") image_tag="amd64" ;;
-                  "linux/arm/v7") image_tag="arm-v7" ;;
                   "linux/arm64/v8") image_tag="arm64-v8" ;;
               esac
 
@@ -49,7 +48,7 @@ jobs:
       - name: Build Optimized Image
         run: |
           image_name="sindrilabs/${{ matrix.image }}"
-          for image_tag in "amd64" "arm-v7" "arm64-v8"; do
+          for image_tag in "amd64" "arm64-v8"; do
             slim build --target "${image_name}:${image_tag}" \
               --tag "${image_name}:${image_tag}-optimized" \
               --http-probe=false \
@@ -63,7 +62,6 @@ jobs:
           image_name="sindrilabs/${{ matrix.image }}"
           docker manifest create "${image_name}:latest" \
             --amend "${image_name}:amd64-optimized" \
-            --amend "${image_name}:arm-v7-optimized" \
             --amend "${image_name}:arm64-v8-optimized"
 
       - name: Deploy to DockerHub
