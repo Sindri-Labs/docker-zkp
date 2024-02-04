@@ -10,6 +10,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         image: ["circom", "circomspect", "nargo", "snarkjs"]
     runs-on: ubuntu-latest
@@ -28,7 +29,20 @@ jobs:
 
       - name: Build the Image
         run: |
-          docker buildx build -f images/${{ matrix.image }}/Dockerfile -t ${{ matrix.image }}:unoptimized --load images/${{ matrix.image }}/
+          # Loop over supported platforms.
+          image_name="sindrilabs/${{ matrix.image }}"
+          for platform in "linux/amd64" "linux/arm64/v8"; do
+              # Determine the custom image tag based on the platform.
+              case $platform in
+                  "linux/amd64") image_tag="amd64" ;;
+                  "linux/arm64/v8") image_tag="arm64-v8" ;;
+              esac
+
+              echo -e "\n\n\nBuilding ${image_name}:${image_tag}"
+              echo -e "=========================================\n\n\n"
+
+            docker buildx build -f images/${{ matrix.image }}/Dockerfile -t "${image_name}:${image_tag}" --load images/${{ matrix.image }}/ --platform $platform
+          done
 
       - name: Install SlimTookit
         run: |
@@ -36,12 +50,33 @@ jobs:
 
       - name: Build Optimized Image
         run: |
-          slim build --target ${{ matrix.image }}:unoptimized \
-            --tag sindrilabs/${{ matrix.image }}:latest \
-            --http-probe=false \
-            --exclude-pattern '/tmp/*' \
-            --mount "./images/${{ matrix.image }}/:/sindri-project/" \
-            --exec "./test.sh"
+          image_name="sindrilabs/${{ matrix.image }}"
+          for arch in "amd64" "arm64"; do
+              # Determine the custom image tag based on the platform.
+              case $arch in
+                  "amd64") image_tag="amd64" ;;
+                  "arm64") image_tag="arm64-v8" ;;
+              esac
+
+              echo -e "\n\n\nOptimizing ${image_name}:${image_tag}"
+              echo -e "=========================================\n\n\n"
+
+            slim build --target "${image_name}:${image_tag}" \
+              --tag "${image_name}:${image_tag}-optimized" \
+              --image-build-arch $arch \
+              --image-build-engine internal \
+              --http-probe=false \
+              --exclude-pattern '/tmp/*' \
+              --mount "./images/${{ matrix.image }}/:/sindri-project/" \
+              --exec "./test.sh"
+          done
+
+      - name: Create MultiArch Image Manifest
+        run: |
+          image_name="sindrilabs/${{ matrix.image }}"
+          docker manifest create "${image_name}:latest" \
+            --amend "${image_name}:amd64-optimized" \
+            --amend "${image_name}:arm64-v8-optimized"
 
       - name: Deploy to DockerHub
         run: |
