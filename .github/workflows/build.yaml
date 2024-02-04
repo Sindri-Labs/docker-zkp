@@ -48,9 +48,16 @@ jobs:
       - name: Build Optimized Image
         run: |
           image_name="sindrilabs/${{ matrix.image }}"
-          for image_tag in "amd64" "arm64-v8"; do
+          for arch in "amd64" "arm64/v8"; do
+              # Determine the custom image tag based on the platform.
+              case $arch in
+                  "amd64") image_tag="amd64" ;;
+                  "arm64/v8") image_tag="arm64-v8" ;;
+              esac
+
             slim build --target "${image_name}:${image_tag}" \
               --tag "${image_name}:${image_tag}-optimized" \
+              --image-build-arch $arch \
               --http-probe=false \
               --exclude-pattern '/tmp/*' \
               --mount "./images/${{ matrix.image }}/:/sindri-project/" \
