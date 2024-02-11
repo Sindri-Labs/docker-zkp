@@ -69,5 +69,18 @@ snarkjs powersoftau export json /tmp/snarkjs_bls12_381/final.ptau /tmp/snarkjs_b
 rm -rf /tmp/snarkjs_bls12_381/
 
 
-# Reading an R1CS file
-# snarkjs r1cs info circuit.r1cs
+# Testing R1CS Read Utilities
+# All of these utilities require a precompiled circom circuit
+mkdir /tmp/snarkjs_r1cs
+
+# Print R1CS file metadata (number of constraints, inputs, etc.)
+snarkjs r1cs info circom_files/circuit.r1cs
+
+# List all of the constraints in the circuit
+snarkjs r1cs print circom_files/circuit.r1cs circom_files/circuit.sym
+
+# Transpile R1CS format into a human-readable JSON file
+snarkjs r1cs export json circom_files/circuit.r1cs /tmp/snarkjs_r1cs/output.json
+
+# get rid of all r1cs files
+rm -rf /tmp/snarkjs_r1cs
