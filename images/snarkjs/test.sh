@@ -6,67 +6,38 @@ set +e
 snarkjs --help
 set -e
 
-# Run a small mock trusted setup for bn128
-mkdir /tmp/snarkjs_bn128
+# Run a small mock trusted setup for bn128 and bls12-381
+for curve in BN254 BLS12-381; do
+    mkdir /tmp/snarkjs_$curve
 
-# Initialize powers of tau file
-snarkjs powersoftau new bn128 10 /tmp/snarkjs_bn128/initial.ptau 
+    # Initialize powers of tau file
+    snarkjs powersoftau new $curve 10 /tmp/snarkjs_$curve/initial.ptau 
 
-# Multiply old powers of tau by private random input (toxic waste)
-snarkjs powersoftau contribute /tmp/snarkjs_bn128/initial.ptau /tmp/snarkjs_bn128/second.ptau -e="input"
+    # Multiply old powers of tau by private random input (toxic waste)
+    snarkjs powersoftau contribute /tmp/snarkjs_$curve/initial.ptau /tmp/snarkjs_$curve/second.ptau -e="input"
 
-# Test export and import utilities for distributed ceremonies
-snarkjs powersoftau export challenge /tmp/snarkjs_bn128/second.ptau /tmp/snarkjs_bn128/challenge
-snarkjs powersoftau challenge contribute bn128 /tmp/snarkjs_bn128/challenge /tmp/snarkjs_bn128/response -e="input"
-snarkjs powersoftau import response /tmp/snarkjs_bn128/second.ptau /tmp/snarkjs_bn128/response /tmp/snarkjs_bn128/third.ptau -n="External Input"
+    # Test export and import utilities for distributed ceremonies
+    snarkjs powersoftau export challenge /tmp/snarkjs_$curve/second.ptau /tmp/snarkjs_$curve/challenge
+    snarkjs powersoftau challenge contribute $curve /tmp/snarkjs_$curve/challenge /tmp/snarkjs_$curve/response -e="input"
+    snarkjs powersoftau import response /tmp/snarkjs_$curve/second.ptau /tmp/snarkjs_$curve/response /tmp/snarkjs_$curve/third.ptau -n="External Input"
 
-# Shift one more time by public source of randomness
-snarkjs powersoftau beacon /tmp/snarkjs_bn128/third.ptau /tmp/snarkjs_bn128/second_beacon.ptau 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10 -n="beacon"
+    # Shift one more time by public source of randomness
+    snarkjs powersoftau beacon /tmp/snarkjs_$curve/third.ptau /tmp/snarkjs_$curve/second_beacon.ptau 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10 -n="beacon"
 
-# Convert raw powers of tau to Lagrange poly evaluations
-snarkjs powersoftau prepare phase2 /tmp/snarkjs_bn128/second_beacon.ptau /tmp/snarkjs_bn128/final.ptau
+    # Convert raw powers of tau to Lagrange poly evaluations
+    snarkjs powersoftau prepare phase2 /tmp/snarkjs_$curve/second_beacon.ptau /tmp/snarkjs_$curve/final.ptau
 
-# Verify contents of powers of tau file via transcript checks
-snarkjs powersoftau verify /tmp/snarkjs_bn128/final.ptau
+    # Verify contents of powers of tau file via transcript checks
+    snarkjs powersoftau verify /tmp/snarkjs_$curve/final.ptau
 
-# Testing all save and load utilities
-snarkjs powersoftau truncate /tmp/snarkjs_bn128/final.ptau
-snarkjs powersoftau convert /tmp/snarkjs_bn128/final.ptau /tmp/snarkjs_bn128/converted.ptau
-snarkjs powersoftau export json /tmp/snarkjs_bn128/final.ptau /tmp/snarkjs_bn128/final_ptau.json
+    # Testing all save and load utilities
+    snarkjs powersoftau truncate /tmp/snarkjs_$curve/final.ptau
+    snarkjs powersoftau convert /tmp/snarkjs_$curve/final.ptau /tmp/snarkjs_$curve/converted.ptau
+    snarkjs powersoftau export json /tmp/snarkjs_$curve/final.ptau /tmp/snarkjs_$curve/final_ptau.json
 
-# get rid of all ptau files
-rm -rf /tmp/snarkjs_bn128/
-
-# Run a mock trusted setup for a different curve: bls12-381
-mkdir /tmp/snarkjs_bls12_381
-
-# Initialize powers of tau file
-snarkjs powersoftau new bls12-381 8 /tmp/snarkjs_bls12_381/initial.ptau 
-
-# Multiply old powers of tau by private random input (toxic waste)
-snarkjs powersoftau contribute /tmp/snarkjs_bls12_381/initial.ptau /tmp/snarkjs_bls12_381/second.ptau -e="input"
-
-# Test export and import utilities for distributed ceremonies
-snarkjs powersoftau export challenge /tmp/snarkjs_bls12_381/second.ptau /tmp/snarkjs_bls12_381/challenge
-snarkjs powersoftau challenge contribute bls12-381 /tmp/snarkjs_bls12_381/challenge /tmp/snarkjs_bls12_381/response -e="some random text"
-snarkjs powersoftau import response /tmp/snarkjs_bls12_381/second.ptau /tmp/snarkjs_bls12_381/response /tmp/snarkjs_bls12_381/third.ptau -n="External Input"
-
-# Shift one more time by public source of randomness
-snarkjs powersoftau beacon /tmp/snarkjs_bls12_381/third.ptau /tmp/snarkjs_bls12_381/second_beacon.ptau 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10 -n="beacon"
-
-# Convert raw powers of tau to Lagrange poly evaluations
-snarkjs powersoftau prepare phase2 /tmp/snarkjs_bls12_381/second_beacon.ptau /tmp/snarkjs_bls12_381/final.ptau
-
-# Verify contents of powers of tau file via transcript checks
-snarkjs powersoftau verify /tmp/snarkjs_bls12_381/final.ptau
-
-# Testing all save and load utilities
-snarkjs powersoftau truncate /tmp/snarkjs_bls12_381/final.ptau
-snarkjs powersoftau convert /tmp/snarkjs_bls12_381/final.ptau /tmp/snarkjs_bls12_381/converted.ptau
-snarkjs powersoftau export json /tmp/snarkjs_bls12_381/final.ptau /tmp/snarkjs_bls12_381/final_ptau.json
-
-# get rid of all ptau files
-rm -rf /tmp/snarkjs_bls12_381/
+    # get rid of all ptau files
+    rm -rf /tmp/snarkjs_$curve/
+done
 
 
 # Testing R1CS Read Utilities
@@ -105,3 +76,17 @@ snarkjs wtns export json /tmp/snarkjs_wtns/witness.wtns /tmp/snarkjs_wtns/witnes
 
 # get rid of all wtns files
 rm -rf /tmp/snarkjs_wtns
+
+
+
+
+# Test Groth16 Backend
+snarkjs groth16 setup circuit.r1cs pot14_final.ptau circuit_0000.zkey
+
+
+# Test Plonk Backend
+snarkjs plonk setup circuit.r1cs pot14_final.ptau circuit_final.zkey
+
+
+# Test Fflonk Backend
+snarkjs fflonk setup circuit.r1cs pot14_final.ptau circuit.zkey
