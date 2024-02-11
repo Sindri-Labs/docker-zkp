@@ -11,7 +11,7 @@ for curve in BN254 BLS12-381; do
     mkdir /tmp/snarkjs_$curve
 
     # Initialize powers of tau file
-    snarkjs powersoftau new $curve 10 /tmp/snarkjs_$curve/initial.ptau 
+    snarkjs powersoftau new $curve 12 /tmp/snarkjs_$curve/initial.ptau 
 
     # Multiply old powers of tau by private random input (toxic waste)
     snarkjs powersoftau contribute /tmp/snarkjs_$curve/initial.ptau /tmp/snarkjs_$curve/second.ptau -e="input"
@@ -35,12 +35,28 @@ for curve in BN254 BLS12-381; do
     snarkjs powersoftau convert /tmp/snarkjs_$curve/final.ptau /tmp/snarkjs_$curve/converted.ptau
     snarkjs powersoftau export json /tmp/snarkjs_$curve/final.ptau /tmp/snarkjs_$curve/final_ptau.json
 
+
+    # Test Groth16 Backend (Requiring Phase 2)
+    # snarkjs groth16 setup circuit.r1cs pot14_final.ptau circuit_0000.zkey
+
+
+    # Test Plonk and Fflonk Backends (No Phase 2 required)
+    for backend in plonk fflonk; do
+        mkdir /tmp/snarkjs_$curve/$backend/
+        snarkjs $backend setup circom_files/circuit.r1cs /tmp/snarkjs_$curve/final.ptau /tmp/snarkjs_$curve/$backend/circuit.zkey
+
+        # end-to-end proof (no preconstructed witness)
+        snarkjs $backend fullprove circom_files/input.json circom_files/circuit.wasm /tmp/snarkjs_$curve/$backend/circuit.zkey /tmp/snarkjs_$curve/$backend/proof.json /tmp/snarkjs_$curve/$backend/public.json
+
+    done
+
     # get rid of all ptau files
     rm -rf /tmp/snarkjs_$curve/
 done
 
+# UTILITIES BELOW ARE INDEPENDENT OF BACKEND AND PROVING CURVE
 
-# Testing R1CS Read Utilities
+# R1CS Read Utilities
 # All of these utilities require a precompiled circom circuit
 mkdir /tmp/snarkjs_r1cs
 
@@ -57,7 +73,7 @@ snarkjs r1cs export json circom_files/circuit.r1cs /tmp/snarkjs_r1cs/output.json
 rm -rf /tmp/snarkjs_r1cs
 
 
-# Testing Witness Utilities
+# Witness Utilities
 mkdir /tmp/snarkjs_wtns
 
 # Use Snarkjs CLI witness generator
@@ -78,15 +94,3 @@ snarkjs wtns export json /tmp/snarkjs_wtns/witness.wtns /tmp/snarkjs_wtns/witnes
 rm -rf /tmp/snarkjs_wtns
 
 
-
-
-# Test Groth16 Backend
-snarkjs groth16 setup circuit.r1cs pot14_final.ptau circuit_0000.zkey
-
-
-# Test Plonk Backend
-snarkjs plonk setup circuit.r1cs pot14_final.ptau circuit_final.zkey
-
-
-# Test Fflonk Backend
-snarkjs fflonk setup circuit.r1cs pot14_final.ptau circuit.zkey

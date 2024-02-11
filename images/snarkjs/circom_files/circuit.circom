@@ -15,4 +15,4 @@ template Multiplier(n) {
     c <== int[n-1];
 }
 
-component main = Multiplier(1000);
+component main = Multiplier(300);
