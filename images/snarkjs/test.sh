@@ -11,7 +11,7 @@ for curve in BN254 BLS12-381; do
     mkdir /tmp/snarkjs_$curve
 
     # Initialize powers of tau file
-    snarkjs powersoftau new $curve 12 /tmp/snarkjs_$curve/initial.ptau 
+    snarkjs powersoftau new $curve 14 /tmp/snarkjs_$curve/initial.ptau 
 
     # Multiply old powers of tau by private random input (toxic waste)
     snarkjs powersoftau contribute /tmp/snarkjs_$curve/initial.ptau /tmp/snarkjs_$curve/second.ptau -e="input"
@@ -41,14 +41,18 @@ for curve in BN254 BLS12-381; do
 
 
     # Test Plonk and Fflonk Backends (No Phase 2 required)
-    for backend in plonk fflonk; do
-        mkdir /tmp/snarkjs_$curve/$backend/
-        snarkjs $backend setup circom_files/circuit.r1cs /tmp/snarkjs_$curve/final.ptau /tmp/snarkjs_$curve/$backend/circuit.zkey
+    # bls12-128 proving not supported by snarkjs
+    if [$curve == bn128]
+    then
+        for backend in plonk fflonk; do
 
-        # end-to-end proof (no preconstructed witness)
-        snarkjs $backend fullprove circom_files/input.json circom_files/circuit.wasm /tmp/snarkjs_$curve/$backend/circuit.zkey /tmp/snarkjs_$curve/$backend/proof.json /tmp/snarkjs_$curve/$backend/public.json
+                mkdir /tmp/snarkjs_$curve/$backend/
+                snarkjs $backend setup circom_files/circuit.r1cs /tmp/snarkjs_$curve/final.ptau /tmp/snarkjs_$curve/$backend/circuit.zkey
 
-    done
+                # end-to-end proof (no preconstructed witness)
+                snarkjs $backend fullprove circom_files/input.json circom_files/circuit.wasm /tmp/snarkjs_$curve/$backend/circuit.zkey /tmp/snarkjs_$curve/$backend/proof.json /tmp/snarkjs_$curve/$backend/public.json
+        done
+    fi
 
     # get rid of all ptau files
     rm -rf /tmp/snarkjs_$curve/
