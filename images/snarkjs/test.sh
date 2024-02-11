@@ -84,3 +84,24 @@ snarkjs r1cs export json circom_files/circuit.r1cs /tmp/snarkjs_r1cs/output.json
 
 # get rid of all r1cs files
 rm -rf /tmp/snarkjs_r1cs
+
+
+# Testing Witness Utilities
+mkdir /tmp/snarkjs_wtns
+
+# Use Snarkjs CLI witness generator
+snarkjs wtns calculate circom_files/circuit.wasm  circom_files/input.json /tmp/snarkjs_wtns/witness.wtns
+
+# Use Snarkjs CLI witness generator in debug mode
+snarkjs wtns debug circom_files/circuit.wasm  circom_files/input.json /tmp/snarkjs_wtns/witness.wtns circom_files/circuit.sym
+
+# Turn witness file into human-readable JSON
+snarkjs wtns export json /tmp/snarkjs_wtns/witness.wtns /tmp/snarkjs_wtns/witness.json
+
+# Validate a witness file against a circuit's R1CS file
+# FIGURE OUT WHY THIS ISNT WORKING
+# snarkjs wtns check circom_files/circuit.r1cs /tmp/snarkjs_wtns/witness.wtns
+
+
+# get rid of all wtns files
+rm -rf /tmp/snarkjs_wtns
