@@ -75,16 +75,15 @@ for curve in BN254 BLS12-381; do
     snarkjs powersoftau convert /tmp/snarkjs/$curve/final.ptau /tmp/snarkjs/$curve/converted.ptau
     snarkjs powersoftau export json /tmp/snarkjs/$curve/final.ptau /tmp/snarkjs/$curve/final_ptau.json
 
-
-
-    # Test Groth16 Backend (Requiring Phase 2)
-    # snarkjs groth16 setup circuit.r1cs pot14_final.ptau circuit_0000.zkey
-
-
-    # Test Plonk and Fflonk Backends (No Phase 2 required)
     # bls12-128 proving not supported by snarkjs
     if [ "$curve" = "BN254" ]
     then
+
+        # Test Groth16 Backend (Requiring Phase 2)
+        # snarkjs groth16 setup circuit.r1cs pot14_final.ptau circuit_0000.zkey
+
+
+        # Test Plonk and Fflonk Backends (No Phase 2 required)
         for backend in plonk fflonk; do
 
                 echo "Proving with $backend"
