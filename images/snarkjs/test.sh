@@ -25,10 +25,6 @@ snarkjs r1cs print circom_files/circuit.r1cs circom_files/circuit.sym
 # Transpile R1CS format into a human-readable JSON file
 snarkjs r1cs export json circom_files/circuit.r1cs /tmp/snarkjs/r1cs/output.json
 
-# get rid of all r1cs files
-rm -rf /tmp/snarkjs/r1cs
-
-
 # Witness Utilities
 mkdir /tmp/snarkjs/wtns
 
@@ -45,7 +41,6 @@ snarkjs wtns export json /tmp/snarkjs/wtns/witness.wtns /tmp/snarkjs/wtns/witnes
 snarkjs wtns check circom_files/circuit.r1cs circom_files/witness.wtns
 
 
-
 # Run a small mock trusted setup for bn128 and bls12-381
 for curve in BN254 BLS12-381; do
     mkdir /tmp/snarkjs/$curve
@@ -59,10 +54,10 @@ for curve in BN254 BLS12-381; do
     # Test export and import utilities for distributed ceremonies
     snarkjs powersoftau export challenge /tmp/snarkjs/$curve/second.ptau /tmp/snarkjs/$curve/challenge
     snarkjs powersoftau challenge contribute $curve /tmp/snarkjs/$curve/challenge /tmp/snarkjs/$curve/response -e="input"
-    snarkjs powersoftau import response /tmp/snarkjs/$curve/second.ptau /tmp/snarkjs/$curve/response /tmp/snarkjs/$curve/third.ptau -n="External Input"
+    snarkjs powersoftau import response /tmp/snarkjs/$curve/second.ptau /tmp/snarkjs/$curve/response /tmp/snarkjs/$curve/third.ptau
 
     # Shift one more time by public source of randomness
-    snarkjs powersoftau beacon /tmp/snarkjs/$curve/third.ptau /tmp/snarkjs/$curve/second_beacon.ptau 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10 -n="beacon"
+    snarkjs powersoftau beacon /tmp/snarkjs/$curve/third.ptau /tmp/snarkjs/$curve/second_beacon.ptau 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10
 
     # Convert raw powers of tau to Lagrange poly evaluations
     snarkjs powersoftau prepare phase2 /tmp/snarkjs/$curve/second_beacon.ptau /tmp/snarkjs/$curve/final.ptau
@@ -82,23 +77,44 @@ for curve in BN254 BLS12-381; do
         # Test Groth16 Backend (Requiring Phase 2) and ZKEY utils
         mkdir /tmp/snarkjs/BN254/groth16/
 
-        snarkjs groth16 setup circom_files/circuit.r1cs /tmp/snarkjs/BN254/final.ptau /tmp/snarkjs/BN254/groth16/circuit.zkey
+        # Initialize circuit specific key
+        snarkjs groth16 setup circom_files/circuit.r1cs /tmp/snarkjs/BN254/final.ptau /tmp/snarkjs/BN254/groth16/circuit_1.zkey
 
+        # TESTING ZKEY UTILITIES
+        snarkjs zkey contribute /tmp/snarkjs/BN254/groth16/circuit_1.zkey /tmp/snarkjs/BN254/groth16/circuit_2.zkey -e="input"
+
+        # External Ceremony Contributions
+        snarkjs zkey export bellman /tmp/snarkjs/BN254/groth16/circuit_2.zkey  /tmp/snarkjs/BN254/groth16/challenge_phase2_3
+        snarkjs zkey bellman contribute bn128 /tmp/snarkjs/BN254/groth16/challenge_phase2_3 /tmp/snarkjs/BN254/groth16/response_phase2_3 -e="input"
+        snarkjs zkey import bellman /tmp/snarkjs/BN254/groth16/circuit_2.zkey /tmp/snarkjs/BN254/groth16/response_phase2_3 /tmp/snarkjs/BN254/groth16/circuit_3.zkey
+
+        # Verify the zkey matches the initial trusted setup and circuit
+        snarkjs zkey verify circom_files/circuit.r1cs /tmp/snarkjs/BN254/final.ptau /tmp/snarkjs/BN254/groth16/circuit_3.zkey
+
+        # Apply public source of randomness
+        snarkjs zkey beacon /tmp/snarkjs/BN254/groth16/circuit_3.zkey /tmp/snarkjs/BN254/groth16/final.zkey 0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f 10
+
+        # Save a JSONified version of the circuit zkey file
+        snarkjs zkey export json /tmp/snarkjs/BN254/groth16/final.zkey /tmp/snarkjs/BN254/groth16/finalzkey.json
 
         # Save a copy of the verification key
-        snarkjs zkey export verificationkey /tmp/snarkjs/BN254/groth16/circuit.zkey /tmp/snarkjs/BN254/groth16/verification_key.json
+        snarkjs zkey export verificationkey /tmp/snarkjs/BN254/groth16/final.zkey /tmp/snarkjs/BN254/groth16/verification_key.json
 
         # End-to-end proof (no preconstructed witness)
-        snarkjs groth16 fullprove circom_files/input.json circom_files/circuit.wasm /tmp/snarkjs/BN254/groth16/circuit.zkey /tmp/snarkjs/BN254/groth16/proofA.json /tmp/snarkjs/BN254/groth16/publicA.json
+        snarkjs groth16 fullprove circom_files/input.json circom_files/circuit.wasm /tmp/snarkjs/BN254/groth16/final.zkey /tmp/snarkjs/BN254/groth16/proofA.json /tmp/snarkjs/BN254/groth16/publicA.json
 
         # Verify the proof
         snarkjs groth16 verify /tmp/snarkjs/BN254/groth16/verification_key.json /tmp/snarkjs/BN254/groth16/publicA.json /tmp/snarkjs/BN254/groth16/proofA.json
 
         # Create a proof from a serialized witness
-        snarkjs groth16 prove /tmp/snarkjs/BN254/groth16/circuit.zkey circom_files/witness.wtns /tmp/snarkjs/BN254/groth16/proofB.json /tmp/snarkjs/BN254/groth16/publicB.json
+        snarkjs groth16 prove /tmp/snarkjs/BN254/groth16/final.zkey circom_files/witness.wtns /tmp/snarkjs/BN254/groth16/proofB.json /tmp/snarkjs/BN254/groth16/publicB.json
 
         # Verify that proof
         snarkjs groth16 verify /tmp/snarkjs/BN254/groth16/verification_key.json /tmp/snarkjs/BN254/groth16/publicB.json /tmp/snarkjs/BN254/groth16/proofB.json
+
+        # Test zkey smart contract utilities
+        snarkjs zkey export solidityverifier /tmp/snarkjs/BN254/groth16/final.zkey /tmp/snarkjs/BN254/groth16/verifier.sol
+        snarkjs zkey export soliditycalldata /tmp/snarkjs/BN254/groth16/publicB.json /tmp/snarkjs/BN254/groth16/proofB.json
 
         # Test Plonk and Fflonk Backends (No Phase 2 required)
         for backend in plonk fflonk; do
