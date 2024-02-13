@@ -79,9 +79,26 @@ for curve in BN254 BLS12-381; do
     if [ "$curve" = "BN254" ]
     then
 
-        # Test Groth16 Backend (Requiring Phase 2)
-        # snarkjs groth16 setup circuit.r1cs pot14_final.ptau circuit_0000.zkey
+        # Test Groth16 Backend (Requiring Phase 2) and ZKEY utils
+        mkdir /tmp/snarkjs/BN254/groth16/
 
+        snarkjs groth16 setup circom_files/circuit.r1cs /tmp/snarkjs/BN254/final.ptau /tmp/snarkjs/BN254/groth16/circuit.zkey
+
+
+        # Save a copy of the verification key
+        snarkjs zkey export verificationkey /tmp/snarkjs/BN254/groth16/circuit.zkey /tmp/snarkjs/BN254/groth16/verification_key.json
+
+        # End-to-end proof (no preconstructed witness)
+        snarkjs groth16 fullprove circom_files/input.json circom_files/circuit.wasm /tmp/snarkjs/BN254/groth16/circuit.zkey /tmp/snarkjs/BN254/groth16/proofA.json /tmp/snarkjs/BN254/groth16/publicA.json
+
+        # Verify the proof
+        snarkjs groth16 verify /tmp/snarkjs/BN254/groth16/verification_key.json /tmp/snarkjs/BN254/groth16/publicA.json /tmp/snarkjs/BN254/groth16/proofA.json
+
+        # Create a proof from a serialized witness
+        snarkjs groth16 prove /tmp/snarkjs/BN254/groth16/circuit.zkey circom_files/witness.wtns /tmp/snarkjs/BN254/groth16/proofB.json /tmp/snarkjs/BN254/groth16/publicB.json
+
+        # Verify that proof
+        snarkjs groth16 verify /tmp/snarkjs/BN254/groth16/verification_key.json /tmp/snarkjs/BN254/groth16/publicB.json /tmp/snarkjs/BN254/groth16/proofB.json
 
         # Test Plonk and Fflonk Backends (No Phase 2 required)
         for backend in plonk fflonk; do
