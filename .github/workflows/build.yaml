@@ -40,7 +40,7 @@ jobs:
             --tag sindrilabs/${{ matrix.image }}:latest \
             --http-probe=false \
             --exclude-pattern '/tmp/*' \
-            --mount "./images/${{ matrix.image }}/:/sindri-project/" \
+            --mount "./images/${{ matrix.image }}/:/sindri/" \
             --exec "./test.sh"
 
       - name: Deploy to DockerHub

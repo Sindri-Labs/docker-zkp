@@ -7,6 +7,6 @@ ENV PATH="/root/.nargo/bin:$PATH"
 RUN noirup
 
 SHELL ["/bin/sh", "-c"]
-WORKDIR /sindri-project/
+WORKDIR /sindri/
 
 ENTRYPOINT ["nargo"]
