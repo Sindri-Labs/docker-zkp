@@ -37,7 +37,7 @@ jobs:
       - name: Build Optimized Image
         run: |
           slim build --target ${{ matrix.image }}:unoptimized \
-            --tag sindrilabs/${{ matrix.image }}:latest \
+            --tag sindrilabs/${{ matrix.image }}:dev \
             --http-probe=false \
             --exclude-pattern '/tmp/*' \
             --mount "./images/${{ matrix.image }}/:/sindri/" \
@@ -45,4 +45,4 @@ jobs:
 
       - name: Deploy to DockerHub
         run: |
-          docker push sindrilabs/${{ matrix.image }}:latest
+          docker push sindrilabs/${{ matrix.image }}:dev
