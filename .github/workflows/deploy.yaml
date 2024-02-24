@@ -17,7 +17,7 @@ jobs:
       matrix:
         include:
           - image: "circomspect"
-          - github_repository: "trailofbits/circomspect"
+            github_repository: "trailofbits/circomspect"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
