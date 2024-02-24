@@ -17,4 +17,4 @@ cd $TEMP_DIR
 git fetch --depth=1 origin +refs/tags/*:refs/tags/* > /dev/null 2>&1
 
 # List and sort tags by date, from oldest to newest.
-git for-each-ref --sort=creatordate --format '%(refname:short)' refs/tags
+git for-each-ref --sort=creatordate --format '%(refname:short)' refs/tags | grep '^v'
