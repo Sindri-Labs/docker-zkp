@@ -14,6 +14,6 @@ RUN git clone https://github.com/trailofbits/circomspect.git \
     && cargo build --release \
     && cargo install --path cli
 
-WORKDIR /sindri-project/
+WORKDIR /sindri/
 
 ENTRYPOINT ["circomspect"]

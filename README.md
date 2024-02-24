@@ -12,7 +12,7 @@ docker compose build
 
 ### Running Command Containers
 
-This will execute the command container with a bind mount of `images/circom/` at `/sindri-project/` (which is also the current working directory) in the container:
+This will execute the command container with a bind mount of `images/circom/` at `/sindri/` (which is also the current working directory) in the container:
 
 ```bash
 # Replace "circom" with the appropriate command.
