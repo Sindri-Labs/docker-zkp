@@ -1,4 +1,4 @@
-name: Build Images
+name: Build Dev Images
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  pr:
     strategy:
       matrix:
         image: ["circom", "circomspect", "nargo", "snarkjs"]
