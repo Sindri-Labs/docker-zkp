@@ -47,13 +47,19 @@ jobs:
         run: |
           echo "Building all tags for ${{ matrix.github_repository }}..."
           for tag in $(./scripts/list-tags.sh ${{ matrix.github_repository }}); do
+            echo "=================================================="
             echo "Freeing up disk space with docker prune..."
+            echo "=================================================="
             docker system prune --all --force --volumes
 
+            echo "=================================================="
             echo "Building ${{ matrix.image }}:${tag}..."
+            echo "=================================================="
             docker buildx build -f images/${{ matrix.image }}/Dockerfile --build-arg "TAG=${tag}" -t ${{ matrix.image }}:unoptimized --load images/${{ matrix.image }}/
 
+            echo "=================================================="
             echo "Optimizing ${{ matrix.image }}:${tag}..."
+            echo "=================================================="
             slim build --target ${{ matrix.image }}:unoptimized \
               --tag "sindrilabs/${{ matrix.image }}:${tag}" \
               --tag sindrilabs/${{ matrix.image }}:latest \
@@ -62,9 +68,13 @@ jobs:
               --mount "./images/${{ matrix.image }}/:/sindri/" \
               --exec "./test.sh"
 
+            echo "=================================================="
             echo "Publishing ${{ matrix.image }}:${tag}..."
+            echo "=================================================="
             docker push "sindrilabs/${{ matrix.image }}:${tag}"
           done
 
+          echo "=================================================="
           echo "Publishing ${{ matrix.image }}:latest..."
+          echo "=================================================="
           docker push sindrilabs/${{ matrix.image }}:latest
