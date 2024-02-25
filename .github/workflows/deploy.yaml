@@ -44,7 +44,7 @@ jobs:
           echo "Building all tags for ${{ matrix.github_repository }}..."
           for tag in $(./scripts/list-tags.sh ${{ matrix.github_repository }}); do
             echo "Freeing up disk space with docker prune..."
-            docker prune --all --force --volumes
+            docker system prune --all --force --volumes
 
             echo "Building ${{ matrix.image }}:${tag}..."
             docker buildx build -f images/${{ matrix.image }}/Dockerfile --build-arg "TAG=${tag}" -t ${{ matrix.image }}:unoptimized --load images/${{ matrix.image }}/
