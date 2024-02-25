@@ -1,0 +1,64 @@
+name: Build and Deploy Tagged Versions
+
+on:
+  # Runs on pushes targeting the default branch.
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab.
+  workflow_dispatch:
+
+  schedule:
+    # Runs at 08:00 UTC every day, 3 or 4am Eastern depending on DST.
+    - cron: "0 8 * * *"
+
+jobs:
+  deploy:
+    strategy:
+      matrix:
+        include:
+          - image: "circomspect"
+            github_repository: "trailofbits/circomspect"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Install SlimTookit
+        run: |
+          curl -sL https://raw.githubusercontent.com/slimtoolkit/slim/master/scripts/install-slim.sh | sudo -E bash -
+
+      - name: Build and Deploy Images
+        run: |
+          echo "Building all tags for ${{ matrix.github_repository }}..."
+          for tag in $(./scripts/list-tags.sh ${{ matrix.github_repository }}); do
+            echo "Freeing up disk space with docker prune..."
+            docker system prune --all --force --volumes
+
+            echo "Building ${{ matrix.image }}:${tag}..."
+            docker buildx build -f images/${{ matrix.image }}/Dockerfile --build-arg "TAG=${tag}" -t ${{ matrix.image }}:unoptimized --load images/${{ matrix.image }}/
+
+            echo "Optimizing ${{ matrix.image }}:${tag}..."
+            slim build --target ${{ matrix.image }}:unoptimized \
+              --tag "sindrilabs/${{ matrix.image }}:${tag}" \
+              --tag sindrilabs/${{ matrix.image }}:latest \
+              --http-probe=false \
+              --exclude-pattern '/tmp/*' \
+              --mount "./images/${{ matrix.image }}/:/sindri/" \
+              --exec "./test.sh"
+
+            echo "Publishing ${{ matrix.image }}:${tag}..."
+            docker push "sindrilabs/${{ matrix.image }}:${tag}"
+          done
+
+          echo "Publishing ${{ matrix.image }}:latest..."
+          docker push sindrilabs/${{ matrix.image }}:latest

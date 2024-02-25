@@ -1,14 +1,10 @@
-name: Build Images
+name: Build Dev Images
 
 on:
-  push:
-    branches: ["main"]
-    tags:
-      - "v*"
   pull_request:
 
 jobs:
-  build:
+  pr:
     strategy:
       matrix:
         image: ["circom", "circomspect", "nargo", "snarkjs"]
@@ -37,12 +33,12 @@ jobs:
       - name: Build Optimized Image
         run: |
           slim build --target ${{ matrix.image }}:unoptimized \
-            --tag sindrilabs/${{ matrix.image }}:latest \
+            --tag sindrilabs/${{ matrix.image }}:dev \
             --http-probe=false \
             --exclude-pattern '/tmp/*' \
-            --mount "./images/${{ matrix.image }}/:/sindri-project/" \
+            --mount "./images/${{ matrix.image }}/:/sindri/" \
             --exec "./test.sh"
 
       - name: Deploy to DockerHub
         run: |
-          docker push sindrilabs/${{ matrix.image }}:latest
+          docker push sindrilabs/${{ matrix.image }}:dev
