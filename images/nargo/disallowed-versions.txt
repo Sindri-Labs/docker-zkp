@@ -1,3 +1,4 @@
+# The API is too different in these early versions.
 v0.0.1
 v0.0.2
 v0.0.3
@@ -27,4 +28,7 @@ v0.7.0
 v0.7.1
 v0.8.0
 v0.9.0
+v0.10.0
+
+# Missing from noirup.
 v0.14.0

@@ -63,7 +63,7 @@ jobs:
           tags=($(./scripts/list-tags.sh ${{ matrix.github_repository }}))
           if [[ -f "$disallowed_versions_file" ]]; then
             # Filter out disallowed versions
-            readarray -t filtered_tags < <(printf '%s\n' "${tags[@]}" | grep -vFxf "$disallowed_versions_file")
+            readarray -t filtered_tags < <(printf '%s\n' "${tags[@]}" | grep -vFxf <(grep -vE '^(#|$)' "$disallowed_versions_file"))
           else
             filtered_tags=("${tags[@]}")
           fi
