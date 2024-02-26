@@ -46,3 +46,5 @@ nargo info
 
 # Execute the backend binary.
 ~/.nargo/backends/acvm-backend-barretenberg/backend_binary --version
+
+exit 0
