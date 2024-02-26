@@ -59,8 +59,17 @@ jobs:
             echo "No extra slim flags detected."
           fi
 
+          disallowed_versions_file="./images/${{ matrix.image }}/disallowed-versions.txt"
+          tags=($(./scripts/list-tags.sh ${{ matrix.github_repository }}))
+          if [[ -f "$disallowed_versions_file" ]]; then
+            # Filter out disallowed versions
+            readarray -t filtered_tags < <(printf '%s\n' "${tags[@]}" | grep -vFxf "$disallowed_versions_file")
+          else
+            filtered_tags=("${tags[@]}")
+          fi
+
           echo "Building all tags for ${{ matrix.github_repository }}..."
-          for tag in $(./scripts/list-tags.sh ${{ matrix.github_repository }}); do
+          for tag in "${filtered_tags[@]}"; do
             echo "=================================================="
             echo "Freeing up disk space with docker prune..."
             echo "=================================================="
