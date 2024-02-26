@@ -1,4 +1,4 @@
-#! /bin/sh +e
+#! /bin/sh -e
 
 # Print help information.
 nargo help
@@ -15,13 +15,17 @@ cd -
 rm -rf /tmp/noir
 
 # Print the current backend.
+set +e
 nargo backend current
+set -e
 
 # Check the constraint system for errors.
 nargo check
 
 # Format the Noir files in a workspace.
+set +e
 nargo fmt
+set -e
 
 # Generate a Solidity verifier smart contract for the program.
 nargo codegen-verifier
@@ -46,5 +50,3 @@ nargo info
 
 # Execute the backend binary.
 ~/.nargo/backends/acvm-backend-barretenberg/backend_binary --version
-
-exit 0
