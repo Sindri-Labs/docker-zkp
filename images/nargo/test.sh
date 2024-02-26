@@ -43,3 +43,6 @@ nargo test
 
 # Print detailed information on a circuit.
 nargo info
+
+# Execute the backend binary.
+~/.nargo/backends/acvm-backend-barretenberg/backend_binary --version
