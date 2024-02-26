@@ -20,14 +20,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - image: "circom"
-            github_repository: "iden3/circom"
           - image: "circomspect"
             github_repository: "trailofbits/circomspect"
           - image: "nargo"
             github_repository: "noir-lang/noir"
-          - image: "snarkjs"
-            github_repository: "iden3/snarkjs"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
