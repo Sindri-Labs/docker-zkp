@@ -14,6 +14,9 @@ nargo init
 cd -
 rm -rf /tmp/noir
 
+# Remove the compiler version field from `Nargo.toml` because it doesn't support the aztec version tags.
+sed -i '/^compiler_version/d' Nargo.toml
+
 # Print the current backend.
 set +e
 nargo backend current
