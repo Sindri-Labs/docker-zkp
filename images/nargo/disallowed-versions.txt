@@ -57,3 +57,15 @@ v0.16.0
 v0.16.0-aztec.0
 v0.16.0-aztec.1
 v0.16.0-aztec.2
+v0.16.0-aztec.2
+v0.17.0-aztec.1
+v0.16.0-aztec.3
+v0.17.0
+v0.17.0-aztec.2
+v0.17.0-aztec.3
+v0.17.0-aztec.4
+v0.18.0
+v0.17.0-aztec.5
+v0.18.0-aztec.0
+v0.18.0-aztec.1
+v0.18.0-aztec.2
