@@ -35,8 +35,9 @@ v0.10.3
 v0.10.4
 v0.10.5
 
-# Has a bug breaking compilation.
+# Have bugs breaking compilation.
 v0.13.0
+v0.16.0-aztec.3
 
 # Missing from noirup.
 v0.14.0
