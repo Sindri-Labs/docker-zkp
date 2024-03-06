@@ -1,0 +1,46 @@
+# The API is too different in these early versions.
+v0.0.1
+v0.0.2
+v0.0.3
+v0.0.4
+v0.0.5
+v0.0.6
+v0.0.7
+v0.0.8
+v0.0.9
+v0.0.10
+v0.0.11
+v0.0.12
+v0.0.13
+v0.0.14
+v0.1.0
+v0.1.1
+v0.2.0
+v0.3.0
+v0.3.1
+v0.3.2
+v0.4.0
+v0.4.1
+v0.5.0
+v0.5.1
+v0.6.0
+v0.7.0
+v0.7.1
+v0.8.0
+v0.9.0
+v0.10.0
+v0.10.1
+v0.10.2
+v0.10.3
+v0.10.4
+v0.10.5
+
+# Have bugs breaking compilation.
+v0.13.0
+v0.16.0-aztec.3
+
+# Missing from noirup.
+v0.14.0
+v0.17.0-aztec.1
+v0.18.0-aztec.3
+v0.21.0

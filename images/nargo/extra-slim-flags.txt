@@ -1,0 +1,5 @@
+--include-bin "/root/.nargo/backends/acvm-backend-barretenberg/backend_binary"
+--include-exe "gzip"
+--include-exe "nargo"
+--include-path "/root/.nargo/"
+--include-path "/usr/bin/gunzip"

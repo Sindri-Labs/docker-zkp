@@ -32,12 +32,28 @@ jobs:
 
       - name: Build Optimized Image
         run: |
+          # Find any extra slim flags to pass when minimizing the image.
+          extra_slim_flags_file="./images/${{ matrix.image }}/extra-slim-flags.txt"
+          extra_slim_flags=()
+          # Check if the extra slim flags file exists
+          if [[ -f "$extra_slim_flags_file" ]]; then
+            # Read each line of the file into the array
+            while IFS= read -r line; do
+              [[ -z "$line" ]] && continue
+              extra_slim_flags+=($line)
+            done < "$extra_slim_flags_file"
+            echo "Running with extra slim flags: ${extra_slim_flags[@]}"
+          else
+            echo "No extra slim flags detected."
+          fi
+
           slim build --target ${{ matrix.image }}:unoptimized \
             --tag sindrilabs/${{ matrix.image }}:dev \
             --http-probe=false \
             --exclude-pattern '/tmp/*' \
             --mount "./images/${{ matrix.image }}/:/sindri/" \
-            --exec "./test.sh"
+            --exec "./test.sh" \
+            "${extra_slim_flags[@]}"
 
       - name: Deploy to DockerHub
         run: |

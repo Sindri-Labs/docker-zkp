@@ -19,6 +19,8 @@ jobs:
         include:
           - image: "circomspect"
             github_repository: "trailofbits/circomspect"
+          - image: "nargo"
+            github_repository: "noir-lang/noir"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -39,26 +41,61 @@ jobs:
 
       - name: Build and Deploy Images
         run: |
+          # Find any extra slim flags to pass when minimizing the image.
+          extra_slim_flags_file="./images/${{ matrix.image }}/extra-slim-flags.txt"
+          extra_slim_flags=()
+          # Check if the extra slim flags file exists
+          if [[ -f "$extra_slim_flags_file" ]]; then
+            # Read each line of the file into the array
+            while IFS= read -r line; do
+              [[ -z "$line" ]] && continue
+              extra_slim_flags+=($line)
+            done < "$extra_slim_flags_file"
+            echo "Running with extra slim flags: ${extra_slim_flags[@]}"
+          else
+            echo "No extra slim flags detected."
+          fi
+
+          disallowed_versions_file="./images/${{ matrix.image }}/disallowed-versions.txt"
+          tags=($(./scripts/list-tags.sh ${{ matrix.github_repository }}))
+          if [[ -f "$disallowed_versions_file" ]]; then
+            # Filter out disallowed versions
+            readarray -t filtered_tags < <(printf '%s\n' "${tags[@]}" | grep -vFxf <(grep -vE '^(#|$)' "$disallowed_versions_file"))
+          else
+            filtered_tags=("${tags[@]}")
+          fi
+
           echo "Building all tags for ${{ matrix.github_repository }}..."
-          for tag in $(./scripts/list-tags.sh ${{ matrix.github_repository }}); do
+          for tag in "${filtered_tags[@]}"; do
+            echo "=================================================="
             echo "Freeing up disk space with docker prune..."
+            echo "=================================================="
             docker system prune --all --force --volumes
 
+            echo "=================================================="
             echo "Building ${{ matrix.image }}:${tag}..."
+            echo "=================================================="
             docker buildx build -f images/${{ matrix.image }}/Dockerfile --build-arg "TAG=${tag}" -t ${{ matrix.image }}:unoptimized --load images/${{ matrix.image }}/
 
+            echo "=================================================="
             echo "Optimizing ${{ matrix.image }}:${tag}..."
+            echo "=================================================="
             slim build --target ${{ matrix.image }}:unoptimized \
               --tag "sindrilabs/${{ matrix.image }}:${tag}" \
               --tag sindrilabs/${{ matrix.image }}:latest \
               --http-probe=false \
               --exclude-pattern '/tmp/*' \
               --mount "./images/${{ matrix.image }}/:/sindri/" \
-              --exec "./test.sh"
+              --exec "./test.sh" \
+               "${extra_slim_flags[@]}"
 
+            echo "=================================================="
             echo "Publishing ${{ matrix.image }}:${tag}..."
+            echo "=================================================="
             docker push "sindrilabs/${{ matrix.image }}:${tag}"
           done
 
+          echo "=================================================="
           echo "Publishing ${{ matrix.image }}:latest..."
+          echo "=================================================="
           docker push sindrilabs/${{ matrix.image }}:latest
